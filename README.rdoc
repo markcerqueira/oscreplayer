@@ -6,8 +6,8 @@ Run *bundle* *install* to get the required gems. We developed and tested this on
 
 Recording OSC messages:
    # listens on the port specified and encodes content into the specified file
-   # data is written to the file when it is sent an interrupt (crtl+c)
-   # send only one interrupt because if you do it twice you will interrupt the flushing of data!
+   # data is written to the file every 2 seconds and/or when it is sent an interrupt (crtl+c)
+   # send only one interrupt because if you do it twice you will interrupt the last flushing of data!
    ruby oscrecorder.rb $PORT_NUMBER > $FILE_NAME
 
 Playing back OSC messages:
