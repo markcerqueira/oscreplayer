@@ -1,7 +1,7 @@
-== osc[recorder | player] - <em>a utility to record and replay OSC messages</em>
-originally by Tom Lieber with modifications by Mark Cerqueira, Spencer Salazar
+=== osc[recorder | player] - <em>utility to replay OSC messages</em>
+originally by {Tom Lieber}[https://github.com/alltom] with modifications by {Mark Cerqueira}[https://github.com/markcerqueira.com], {Spencer Salazar}[https://github.com/spencersalazar]
 
-===HOW TO
+====HOW TO
 * *bundle* *install* to get the required gems
 
    # listens on the port specified and encodes content into the specified file
