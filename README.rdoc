@@ -1,14 +1,19 @@
-=== osc[recorder | player] - <em>utility to replay OSC messages</em>
+=== oscreplayer - <em>utility to replay OSC messages</em>
 originally by {Tom Lieber}[https://github.com/alltom] with modifications by {Mark Cerqueira}[https://github.com/markcerqueira], {Spencer Salazar}[https://github.com/spencersalazar]
 
 ====HOW TO
 Run *bundle* *install* to get the required gems. We developed and tested this on Ruby version 1.9.3.
 
+Recording OSC messages:
    # listens on the port specified and encodes content into the specified file
-   # data is written to the file on script exit (crtl+c once only because if you do it twice you might interrupt the flushing of data)
+   # data is written to the file when it is sent an interrupt (crtl+c)
+   # send only one interrupt because if you do it twice you will interrupt the flushing of data!
    ruby oscrecorder.rb $PORT_NUMBER > $FILE_NAME
 
+Playing back OSC messages:
    # replays OSC messages from specified file, sending them to the specified address and port
    # BOOL_WAIT specifies whether the script should sleep the amount of time it took to send the first message
    $FILE_NAME | ruby oscplayer.rb $ADDRESS $PORT_NUMBER $BOOL_WAIT
    
+====LICENSE
+Tom originally developed this code and goes to MIT so oscreplayer is released under the {MIT License}[http://opensource.org/licenses/MIT]. 
