@@ -6,7 +6,7 @@ Run *bundle* *install* to get the required gems. We developed and tested this on
 
 Recording OSC messages:
    # listens on the port specified and encodes content into the specified file
-   # data is written to the file every 2 seconds and/or when it is sent an interrupt (crtl+c)
+   # data is written to the file every 2 seconds and when an interrupt (crtl+c) is caught
    # send only one interrupt because if you do it twice you will interrupt the last flushing of data!
    ruby oscrecorder.rb $PORT_NUMBER > $FILE_NAME
 
@@ -14,6 +14,12 @@ Playing back OSC messages:
    # replays OSC messages from specified file, sending them to the specified address and port
    # BOOL_WAIT specifies whether the script should sleep the amount of time it took to send the first message
    $FILE_NAME | ruby oscplayer.rb $ADDRESS $PORT_NUMBER $BOOL_WAIT
-   
+
+====MY DESIRES
+1. Use filenames are arguments instead of stdin/stdout
+2. Better options parsing (maybe with trollop)
+3. Utility to display data of an encoded file
+4. GUI a la {Charles Proxy}[http://www.charlesproxy.com/] that allows for real-time recording and playing back with data modifications
+
 ====LICENSE
 Tom originally developed this code and goes to MIT so oscreplayer is released under the {MIT License}[http://opensource.org/licenses/MIT]. 
