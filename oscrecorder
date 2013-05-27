@@ -3,19 +3,49 @@
 require 'rubygems'
 require 'osc-ruby'
 require 'yaml'
+require 'openwfe/util/scheduler'
 
 port = ARGV[0]
 
 @server = OSC::Server.new( port )
-
+@scheduler = OpenWFE::Scheduler.new
 @messages = []
+@messages_mutex = Mutex.new
+
 @server.add_method // do | message |
-  @messages << { :message => message.encode, :time => Time.now - @start }
+  @messages_mutex.synchronize do
+     @messages << { :message => message.encode, :time => Time.now - @start } 
+  end
 end
 
-begin
+# method to flush out the @messages array
+def flushMessages()
+  @messages_mutex.synchronize do
+    if @messages.size > 0
+      puts @messages.to_yaml
+      @messages.clear
+    end
+  end
+end
+
+# quit unless our script gets the port to listen on
+unless ARGV.length == 1
+  puts "usage: oscrecorder port_number\n"
+  exit
+end
+
+begin  
+  # schedule messages to be flushed every 2 seconds
+  @scheduler.start  
+  @scheduler.schedule_every('2s') { flushMessages() }
+  
   @start = Time.now
   @server.run
+  
+# catch any interrupts and flush data  
 rescue SystemExit, Interrupt
-  puts @messages.to_yaml
+  flushMessages()
 end
+
+
+

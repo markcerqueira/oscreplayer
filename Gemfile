@@ -7,6 +7,7 @@ ruby "1.9.3"
 #   gem "activesupport", ">= 2.3.5"
 
 gem "osc-ruby"
+gem "openwferu-scheduler"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
