@@ -2,10 +2,10 @@
 originally by {Tom Lieber}[https://github.com/alltom] with modifications by {Mark Cerqueira}[https://github.com/markcerqueira], {Spencer Salazar}[https://github.com/spencersalazar]
 
 ====HOW TO
-Run *bundle* *install* to get the required gems.
+Run *bundle* *install* to get the required gems. We developed and tested this on Ruby version 1.9.3.
 
    # listens on the port specified and encodes content into the specified file
-   # data is written to the file on script exit
+   # data is written to the file on script exit (crtl+c once only because if you do it twice you might interrupt the flushing of data)
    ruby oscrecorder.rb $PORT_NUMBER > $FILE_NAME
 
    # replays OSC messages from specified file, sending them to the specified address and port
