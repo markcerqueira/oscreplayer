@@ -2,7 +2,13 @@
 originally by {Tom Lieber}[https://github.com/alltom] with modifications by {Mark Cerqueira}[https://github.com/markcerqueira], {Spencer Salazar}[https://github.com/spencersalazar]
 
 ====HOW TO
-* *bundle* *install* to get the required gems
+Run *bundle* *install* to get the required gems.
 
    # listens on the port specified and encodes content into the specified file
-   ruby oscrecorder.rb $PORT_NUMBER > $FILE.TXT
+   # data is written to the file on script exit
+   ruby oscrecorder.rb $PORT_NUMBER > $FILE_NAME
+
+   # replays OSC messages from specified file, sending them to the specified address and port
+   # BOOL_WAIT specifies whether the script should sleep the amount of time it took to send the first message
+   $FILE_NAME | ruby oscplayer.rb $ADDRESS $PORT_NUMBER $BOOL_WAIT
+   
