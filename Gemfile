@@ -8,6 +8,7 @@ ruby "1.9.3"
 
 gem "osc-ruby"
 gem "openwferu-scheduler"
+gem "trollop"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.

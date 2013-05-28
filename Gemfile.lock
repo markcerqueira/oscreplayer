@@ -3,6 +3,7 @@ GEM
   specs:
     openwferu-scheduler (0.9.16.1404)
     osc-ruby (1.1.0)
+    trollop (2.0)
 
 PLATFORMS
   ruby
@@ -10,3 +11,4 @@ PLATFORMS
 DEPENDENCIES
   openwferu-scheduler
   osc-ruby
+  trollop

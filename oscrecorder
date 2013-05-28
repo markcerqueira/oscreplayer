@@ -1,16 +1,19 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 require 'rubygems'
 require 'osc-ruby'
 require 'yaml'
 require 'openwfe/util/scheduler'
 
-port = ARGV[0]
+# command-line arguments
+@port = ARGV[0]
+@filename = ARGV[1]
 
-@server = OSC::Server.new( port )
 @scheduler = OpenWFE::Scheduler.new
 @messages = []
 @messages_mutex = Mutex.new
+@file = nil
+@server = OSC::Server.new(@port)
 
 @server.add_method // do | message |
   @messages_mutex.synchronize do
@@ -22,16 +25,37 @@ end
 def flushMessages()
   @messages_mutex.synchronize do
     if @messages.size > 0
-      puts @messages.to_yaml
+      # if filename was not specified, just write to stdout
+      if @file.nil?
+        puts @messages.to_yaml
+      else
+        @file.write @messages.to_yaml
+      end
+      
       @messages.clear
     end
   end
 end
 
 # quit unless our script gets the port to listen on
-unless ARGV.length == 1
-  puts "usage: oscrecorder port_number\n"
+unless ARGV.length > 0
+  puts "usage: oscrecorder port_number (required) filename (optional)\n"
   exit
+end
+
+# if a filename is specified, first check to see the file does not exist, then open it
+unless @filename.nil?
+  if File.exists? @filename
+    puts "error: file #{@filename} already exists!"
+    exit
+  end
+  
+  @file = File.open(@filename, 'w+')
+  
+  # from the Ruby docs: when sync mode is true, all output is immediately flushed to the underlying operating system and is not buffered internally
+  # we don't want to close and re-open the file after every call to flushMessages(), but we may want to see the data being written to the file as we are recording
+  # if performance becomes an issue, this can be set to false (or removed) and the file will be closed on the SystemExit/Interrupt catch below
+  @file.sync = true
 end
 
 begin  
@@ -42,9 +66,11 @@ begin
   @start = Time.now
   @server.run
   
-# catch any interrupts and flush data  
+# catch any interrupts and flushes any remaining data  
 rescue SystemExit, Interrupt
   flushMessages()
+  
+  @file.close
 end
 
 

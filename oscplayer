@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 require 'rubygems'
 require 'osc-ruby'
@@ -7,16 +7,30 @@ require 'yaml'
 address = ARGV[0]
 port = ARGV[1]
 wait = ARGV[2] # wait boolean toggles whether the padded time at the beginning of recorded yml osc action is used
+filename = ARGV[3]
 m_time = 0
 start_time = 0
 
-@client = OSC::Client.new( address, port )
+unless ARGV.length >= 2
+  puts "usage: oscplayer destination_address (required) port_number (required) wait (optional) filename (optional)\n"
+  exit
+end
 
-@messages = YAML.load($stdin)
-
+@client = OSC::Client.new(address, port)
 @start = Time.now
 
-@messages.each_with_index do |m, index|
+# load from stdin if filename is not specified
+if filename.nil?
+  @messages = YAML.load_stream($stdin)
+else
+  @messages = YAML.load_stream(File.open(filename))
+end
+
+@messages.each_with_index do |message, index|
+  # puts "#{message.class} #{message.inspect}"
+  # message is actually an array of size 1 that contains our message object at index 0
+  m = message[0]
+  
   if index == 0
     start_time = m[:time]
   end
@@ -33,6 +47,7 @@ start_time = 0
   # sleep if necessary
   puts "sleeping #{dt}" if dt > 0
   sleep(dt) if dt > 0
+  puts '' if dt > 0
   
   message = OSC::OSCPacket.messages_from_network(m[:message]).first
   p message
