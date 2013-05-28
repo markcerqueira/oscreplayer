@@ -4,25 +4,40 @@ require 'rubygems'
 require 'osc-ruby'
 require 'yaml'
 require 'openwfe/util/scheduler'
-
-# command-line arguments
-@port = ARGV[0]
-@filename = ARGV[1]
+require 'trollop'
 
 @scheduler = OpenWFE::Scheduler.new
 @messages = []
 @messages_mutex = Mutex.new
-@file = nil
-@server = OSC::Server.new(@port)
 
-@server.add_method // do | message |
+# trollop for better options parsing
+opts = Trollop::options do
+    version "oscrecorder 1.0 by Tom Lieber, Mark Cerqueira, Spencer Salazar"
+    banner <<-EOS
+oscrecorder is a utilty that records OSC messages.
+
+Usage:
+  oscrecorder [options]
+  
+  where [options] are:
+EOS
+  opt :port, "Integer specifying the port to listen for OSC messages", :type => :int, :default => -1
+  opt :filename, "String specifying the filename to write encoded data to", :type => :string
+end
+
+# abort if port was not sent by user
+Trollop::die :port, "must be defined" if opts[:port] < 0 or opts[:port] > 65535
+
+# server that grabs and caches our OSC messages
+@server = OSC::Server.new(opts[:port])
+@server.add_method // do | message |  
   @messages_mutex.synchronize do
      @messages << { :message => message.encode, :time => Time.now - @start } 
   end
 end
 
 # method to flush out the @messages array
-def flushMessages()
+def flushMessages()  
   @messages_mutex.synchronize do
     if @messages.size > 0
       # if filename was not specified, just write to stdout
@@ -37,20 +52,17 @@ def flushMessages()
   end
 end
 
-# quit unless our script gets the port to listen on
-unless ARGV.length > 0
-  puts "usage: oscrecorder port_number (required) filename (optional)\n"
-  exit
-end
-
 # if a filename is specified, first check to see the file does not exist, then open it
-unless @filename.nil?
-  if File.exists? @filename
-    puts "error: file #{@filename} already exists!"
+@file = nil
+if opts.has_key?(:filename) and !opts[:filename].nil?
+  filename = opts[:filename]
+  if File.exists? filename
+    puts "Error: file with name #{filename} already exists."
+    puts "Try using a filename that is not already used."
     exit
   end
   
-  @file = File.open(@filename, 'w+')
+  @file = File.open(filename, 'w+')
   
   # from the Ruby docs: when sync mode is true, all output is immediately flushed to the underlying operating system and is not buffered internally
   # we don't want to close and re-open the file after every call to flushMessages(), but we may want to see the data being written to the file as we are recording
@@ -63,9 +75,10 @@ begin
   @scheduler.start  
   @scheduler.schedule_every('2s') { flushMessages() }
   
+  # record current time and start the server 
   @start = Time.now
   @server.run
-  
+    
 # catch any interrupts and flushes any remaining data  
 rescue SystemExit, Interrupt
   flushMessages()

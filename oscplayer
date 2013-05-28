@@ -3,18 +3,40 @@
 require 'rubygems'
 require 'osc-ruby'
 require 'yaml'
+require 'trollop'
 
-address = ARGV[0]
-port = ARGV[1]
-wait = ARGV[2] # wait boolean toggles whether the padded time at the beginning of recorded yml osc action is used
-filename = ARGV[3]
+# address = ARGV[0]
+# port = ARGV[1]
+# wait = ARGV[2] # wait boolean toggles whether the padded time at the beginning of recorded yml osc action is used
+# filename = ARGV[3]
 m_time = 0
 start_time = 0
 
-unless ARGV.length >= 2
-  puts "usage: oscplayer destination_address (required) port_number (required) wait (optional) filename (optional)\n"
-  exit
+# trollop for better options parsing
+opts = Trollop::options do
+    version "oscplayer 1.0 by Tom Lieber, Mark Cerqueira, Spencer Salazar"
+    banner <<-EOS
+oscplayer is a utilty that plays back OSC messages.
+
+Usage:
+  oscplayer [options]
+  
+  where [options] are:
+EOS
+  opt :address, "String specifying the address to send OSC messages", :type => :string
+  opt :port, "Integer specifying the port to listen for OSC messages", :type => :int, :default => -1
+  opt :filename, "String specifying the filename to write encoded data to", :type => :string
+  opt :wait, "Boolean specifying whether the time of the first recorded message should be respected", :default => false
 end
+
+# abort if port/address was not sent by user
+Trollop::die :port, "must be defined" if opts[:port] < 0 or opts[:port] > 65535
+Trollop::die :address, "must be defined" if !opts.has_key?(:address) || opts[:address].nil?
+
+port = opts[:port]
+address = opts[:address]
+wait = opts[:wait]
+filename = opts[:filename]
 
 @client = OSC::Client.new(address, port)
 @start = Time.now
@@ -35,7 +57,7 @@ end
     start_time = m[:time]
   end
 
-  if wait=='true' or wait=='1'
+  if wait
     m_time = m[:time]
   else
     m_time = m[:time] - start_time
