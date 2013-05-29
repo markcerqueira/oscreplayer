@@ -5,13 +5,6 @@ require 'osc-ruby'
 require 'yaml'
 require 'trollop'
 
-# address = ARGV[0]
-# port = ARGV[1]
-# wait = ARGV[2] # wait boolean toggles whether the padded time at the beginning of recorded yml osc action is used
-# filename = ARGV[3]
-m_time = 0
-start_time = 0
-
 # trollop for better options parsing
 opts = Trollop::options do
     version "oscplayer 1.0 by Tom Lieber, Mark Cerqueira, Spencer Salazar"
@@ -38,46 +31,51 @@ address = opts[:address]
 wait = opts[:wait]
 filename = opts[:filename]
 
+m_time = 0
+start_time = 0
+
 @client = OSC::Client.new(address, port)
 @start = Time.now
 
 # load from stdin if filename is not specified
 if filename.nil?
-  @messages = YAML.load_stream($stdin)
+  @message_batches = YAML.load_stream($stdin)
 else
-  @messages = YAML.load_stream(File.open(filename))
+  @message_batches = YAML.load_stream(File.open(filename))
 end
 
-@messages.each_with_index do |message, index|
-  # puts "#{message.class} #{message.inspect}"
-  # message is actually an array of size 1 that contains our message object at index 0
-  m = message[0]
-  
-  if index == 0
-    start_time = m[:time]
-  end
+start_time_determined = false
 
-  if wait
-    m_time = m[:time]
-  else
-    m_time = m[:time] - start_time
-  end
+# message_batches - for every "flush" by oscrecorder, we get a "message_batch"
+@message_batches.each_with_index do |message_batch, index|
+  # a message_batch can contain one through many messages
+  message_batch.each_with_index do |msg, i|
+    if start_time_determined == false
+      start_time = msg[:time]
+      start_time_determined = true
+    end
 
-  dt = (@start + m_time) - Time.now
-  # dt = (@start + m[:time]) - Time.now
+    if wait
+      m_time = msg[:time]
+    else
+      m_time = msg[:time] - start_time
+    end
 
-  # sleep if necessary
-  puts "sleeping #{dt}" if dt > 0
-  sleep(dt) if dt > 0
-  puts '' if dt > 0
+    dt = (@start + m_time) - Time.now
+    # dt = (@start + m[:time]) - Time.now
+
+    # sleep if necessary
+    puts "sleeping #{dt}" if dt > 0
+    sleep(dt) if dt > 0
+    puts '' if dt > 0
   
-  message = OSC::OSCPacket.messages_from_network(m[:message]).first
-  p message
-  begin
-    @client.send(message)
-  rescue
-    puts "Error sending message!"
+    message = OSC::OSCPacket.messages_from_network(msg[:message]).first
+    p message
+    begin
+      @client.send(message)
+    rescue
+      puts "Error sending message!"
+    end
+    puts ''
   end
-  
-  puts ''
 end
