@@ -16,7 +16,10 @@ Recording OSC messages with *oscrecorder* requires specifying the port (--port, 
    $ oscrecorder -p 6600 > osc_processor
 
 ====PLAYING BACK MESSAGES
-Playing back OSC messages with *oscplayer* requires specifying the address (--address, -a) and port (--port, -p) to send OSC messages to and optionally, a flag (--wait, -w) to specify whether the padding for the initial message - the time from when recording began to when the first message was received - should be respected, and a filename (--filename, -f) to read data from. If no boolean is specified, the initial time padding is ignored. If no filename is specified, oscrecorder will attempt to load data from stdin.
+Playing back OSC messages with *oscplayer* requires specifying the address (--address, -a) and port (--port, -p) to send OSC messages to and optionally:
+* A flag (--wait, -w) to specify whether the padding for the initial message - the time from when recording began to when the first message was received - should be respected. If the flag is not passed, the initial time padding is ignored and the first message is sent immediately.
+* A string specifying a filename (--filename, -f) to read data from. If no filename is specified, oscrecorder will attempt to load data from stdin.
+* A float value (--skip, -s) to skip all messages recorded before the time passed. If the flag/value is not passed, all messages will be sent. Note that the -s and -w can work together - if you skip messages and still want to "wait" the last message ignored will be treated as time 0.
 
    # parses messages from osc_data.yml, sending them to 127.0.0.1:5200 and respects the initial padding
    # on the first message
@@ -28,6 +31,15 @@ Playing back OSC messages with *oscplayer* requires specifying the address (--ad
    # parses messages from osc_data.yml (read via stdin), sending them to 127.0.0.1:5400 and ignores the 
    # initial padding on the first message (i.e. starts sending messages immediately)
    $ osc_data.yml | oscplayer -a 127.0.0.1 -p 5400 
+
+   # skips all messages sent before time 60
+   # since -w is not passed, the first message sent after time 60 is sent immediately
+   $ oscplayer -a 127.0.0.1 -p 5200 -f osc_data.yml -s 60
+
+   # skips all messages sent before time 60
+   # since -w is passed, the last packet skipped will be treated as time 0 and the time delta between the
+   # last skipped message and the first message to be sent will be respected
+   $ oscplayer -a 127.0.0.1 -p 5200 -f osc_data.yml -w -s 60
 
 ===MY DESIRES
 1. Fast forward! oscplayer should be able to skip all messages before time t.

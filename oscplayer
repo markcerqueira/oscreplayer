@@ -20,16 +20,19 @@ EOS
   opt :port, "Integer specifying the port to listen for OSC messages", :type => :int, :default => -1
   opt :filename, "String specifying the filename to write encoded data to", :type => :string
   opt :wait, "Boolean specifying whether the time of the first recorded message should be respected", :default => false
+  opt :skip, "Float specifying which time to skip to, ignoring all message sent before the time specified", :type => :float, :default => 0.0
 end
 
 # abort if port/address was not sent by user
 Trollop::die :port, "must be defined" if opts[:port] < 0 or opts[:port] > 65535
 Trollop::die :address, "must be defined" if !opts.has_key?(:address) || opts[:address].nil?
+Trollop::die :skip, "must be non-negative if defined" if !opts.has_key?(:skip) || opts[:skip] < 0.0
 
 port = opts[:port]
 address = opts[:address]
-wait = opts[:wait]
 filename = opts[:filename]
+skip_time = opts[:skip]
+wait = opts[:wait]
 
 m_time = 0
 start_time = 0
@@ -45,18 +48,25 @@ else
 end
 
 start_time_determined = false
+start_time_offset_for_skip = 0.0
 
 # message_batches - for every "flush" by oscrecorder, we get a "message_batch"
 @message_batches.each_with_index do |message_batch, index|
   # a message_batch can contain one through many messages
   message_batch.each_with_index do |msg, i|
+    if skip_time > 0 and msg[:time] < skip_time
+      # this will be used to re-orient our notion of beginning if the "wait" option is true
+      start_time_offset_for_skip = msg[:time]
+      next
+    end
+    
     if start_time_determined == false
       start_time = msg[:time]
       start_time_determined = true
     end
 
     if wait
-      m_time = msg[:time]
+      m_time = msg[:time] - start_time_offset_for_skip
     else
       m_time = msg[:time] - start_time
     end
