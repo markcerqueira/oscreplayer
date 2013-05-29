@@ -42,10 +42,9 @@ Playing back OSC messages with *oscplayer* requires specifying the address (--ad
    $ oscplayer -a 127.0.0.1 -p 5200 -f osc_data.yml -w -s 60
 
 ===MY DESIRES
-1. Fast forward! oscplayer should be able to skip all messages before time t.
-2. Utility to display data of an encoded file.
-3. Utility to decode/re-encode files to allow modifications.
-4. GUI a la {Charles Proxy}[http://www.charlesproxy.com/] that allows for real-time recording and playing back with data modifications.
+1. Utility to display data of an encoded file.
+2. Utility to decode/re-encode files to allow modifications.
+3. GUI a la {Charles Proxy}[http://www.charlesproxy.com/] that allows for real-time recording and playing back with data modifications.
 
 ===FAQ
 1. Help! When I run *oscrecorder* I get this error every time a message is received:
