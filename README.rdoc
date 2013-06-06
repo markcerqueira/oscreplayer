@@ -53,12 +53,12 @@ Playing back OSC messages with *oscplayer* requires specifying the address (--ad
 4. GUI a la {Charles Proxy}[http://www.charlesproxy.com/] that allows for real-time recording and playing back with data modifications.
 
 ===FAQ
-1. Help! When I run *oscrecorder* I get this error every time a message is received:
+- Help! When I run *oscrecorder* I get this error every time a message is received:
     network_packet.rb:4:in `initialize': undefined method `force_encoding' for #<String:0x10ee199e8> (NoMethodError)
 
 Check your version of ruby. force_encoding is not implemented in Ruby 1.8.
 
-2. I set the --forward flag on my oscrecorder, but the messages are not getting forwarded!
+- I set the --forward flag on my oscrecorder, but the messages are not getting forwarded!
 
 Ensure you the listener for forwarded messages is listening on the port the recorder is running on + 2. If your recorder is listening on port 4410, anyone who wants the forwarded messages should listen on 4412. Getting osc-ruby to support the SO_REUSEADDR flag for UDP sockets would let us get around this little dance!
 
