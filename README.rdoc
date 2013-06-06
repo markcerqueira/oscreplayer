@@ -6,7 +6,7 @@ originally by {Tom Lieber}[https://github.com/alltom] with modifications by {Mar
 Run *bundle* *install* to get the required gems. We developed this on Ruby version 1.9.3 so you should use at least that. Run <b>ruby --version</b> to check your version of ruby. 
 
 ====RECORDING MESSAGES
-Recording OSC messages with *oscrecorder* requires specifying the port (--port, -p) to listen for OSC messages on and optionally, specifying a filename (--filename, -f) to write YAML-encoded message data to. If no filename is specified, data is written to stdout. Message data is cached and flushed to the file/stdout every 2 seconds and when an interrupt (i.e. SystemExit, Interrupt) is received. Be careful to only send one interrupt (crtl+c only once) because you may interrupt the last flushing of data if you send multiple interrupts.
+Recording OSC messages with *oscrecorder* requires specifying the port (--port, -p) to listen for OSC messages on and optionally, specifying a filename (--filename, -f) to write YAML-encoded message data to. If no filename is specified, data is written to stdout. Optionally, if the forward flag (--forward, -o) is defined, messages received will be forwarded to the address of the recorded message and the port + 2 (because you cannot bind two Ruby OSC clients to the same port). Message data is cached and flushed to the file/stdout every 2 seconds and when an interrupt (i.e. SystemExit, Interrupt) is received. Be careful to only send one interrupt (crtl+c only once) because you may interrupt the last flushing of data if you send multiple interrupts.
  
    # grabs OSC messages received on port 4420, writing data to the osc_data.yml file
    $ oscrecorder --port 4420 --filename osc_data.yml
@@ -14,6 +14,11 @@ Recording OSC messages with *oscrecorder* requires specifying the port (--port, 
    # grabs OSC messages received on port 6600, writing data to stdout; here we pipe that data into 
    # a hypothetical script, osc_processor, that does real-time processing
    $ oscrecorder -p 6600 > osc_processor
+
+   # grabs OSC messages received on port 6600, writing data to stdout
+   # with --forward / -o, messages will be forwarded to the message's original destination,
+   # on port 6602 (i.e. 6600 + 2)
+   $ oscrecorder -p 6600 --forward
 
 ====PLAYING BACK MESSAGES
 Playing back OSC messages with *oscplayer* requires specifying the address (--address, -a) and port (--port, -p) to send OSC messages to and optionally:
@@ -42,15 +47,20 @@ Playing back OSC messages with *oscplayer* requires specifying the address (--ad
    $ oscplayer -a 127.0.0.1 -p 5200 -f osc_data.yml -w -s 60
 
 ===MY DESIRES
-1. Utility to display data of an encoded file.
-2. Utility to decode/re-encode files to allow modifications.
-3. GUI a la {Charles Proxy}[http://www.charlesproxy.com/] that allows for real-time recording and playing back with data modifications.
+1. Unit tests!
+2. Utility to display data of an encoded file.
+3. Utility to decode/re-encode files to allow modifications.
+4. GUI a la {Charles Proxy}[http://www.charlesproxy.com/] that allows for real-time recording and playing back with data modifications.
 
 ===FAQ
 1. Help! When I run *oscrecorder* I get this error every time a message is received:
     network_packet.rb:4:in `initialize': undefined method `force_encoding' for #<String:0x10ee199e8> (NoMethodError)
 
 Check your version of ruby. force_encoding is not implemented in Ruby 1.8.
+
+2. I set the --forward flag on my oscrecorder, but the messages are not getting forwarded!
+
+Ensure you the listener for forwarded messages is listening on the port the recorder is running on + 2. If your recorder is listening on port 4410, anyone who wants the forwarded messages should listen on 4412. Getting osc-ruby to support the SO_REUSEADDR flag for UDP sockets would let us get around this little dance!
 
 ===LICENSE
 Tom originally developed this code and goes to MIT so oscreplayer is released under the {MIT License}[http://opensource.org/licenses/MIT]. 

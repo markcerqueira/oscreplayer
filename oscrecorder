@@ -23,16 +23,23 @@ Usage:
 EOS
   opt :port, "Integer specifying the port to listen for OSC messages", :type => :int, :default => -1
   opt :filename, "String specifying the filename to write encoded data to", :type => :string
+  opt :forward, "Flag specifying whether recorded messages should be forwarded to destination. Note - if messages " +
+  "are forwarded, destination should listen on (port + 2) because you cannot bind two separate OSC clients to the same port."
 end
 
 # abort if port was not sent by user
 Trollop::die :port, "must be defined" if opts[:port] < 0 or opts[:port] > 65535
 
-# server that grabs and caches our OSC messages
+# server that grabs and caches our OSC messages (optionally forwarding if -o flag defined)
 @server = OSC::Server.new(opts[:port])
 @server.add_method // do | message |  
   @messages_mutex.synchronize do
-     @messages << { :message => message.encode, :time => Time.now - @start } 
+     @messages << { :message => message.encode, :time => Time.now - @start, :address => message.address, :content => message.to_a }      
+  end
+  
+  if opts[:forward]
+    client = OSC::Client.new(message.ip_address, opts[:port]+2)  
+    client.send(message)
   end
 end
 
