@@ -1,12 +1,15 @@
 # oscreplayer - <em>utility to replay OSC messages</em>
 originally by [Tom Lieber](https://github.com/alltom) with modifications by [Mark Cerqueira](https://github.com/markcerqueira), [Spencer Salazar](https://github.com/spencersalazar)
 
-## HOW TO
-### SETUP
+## SETUP
 Run *bundle* *install* to get the required gems. We developed this on Ruby version 1.9.3 so you should use at least that. Run <b>ruby --version</b> to check your version of ruby. 
 
-### RECORDING MESSAGES
-Recording OSC messages with *oscrecorder* requires specifying the port (--port, -p) to listen for OSC messages on and optionally, specifying a filename (--filename, -f) to write YAML-encoded message data to. If no filename is specified, data is written to stdout. Optionally, if the forward flag (--forward, -o) is defined, messages received will be forwarded to the address of the recorded message and the port + 2 (because you cannot bind two Ruby OSC clients to the same port). Message data is cached and flushed to the file/stdout every 2 seconds and when an interrupt (i.e. SystemExit, Interrupt) is received. Be careful to only send one interrupt (crtl+c only once) because you may interrupt the last flushing of data if you send multiple interrupts.
+## RECORDING MESSAGES
+Recording OSC messages with *oscrecorder* requires specifying the port (--port, -p) to listen for OSC messages on and optionally:
+* A string specifying a filename (--filename, -f) to write recorded data to. If no filename is specified, data is written to stdout.
+* A flag (--forward, -o) that enables forwarding for recorded messages. Messages will be forwarded to the address of the recorded message and the port + 2 (because you cannot bind two osc-ruby OSC clients to the same port).
+
+Message data is cached and flushed to the file/stdout every 2 seconds and when an interrupt (i.e. SystemExit, Interrupt) is received. Be careful to only send one interrupt (crtl+c only once) because you may interrupt the last flushing of data if you send multiple interrupts.
 
 ``` shell
 # grabs OSC messages received on port 4420, writing data to the osc_data.yml file
@@ -25,7 +28,7 @@ $ oscrecorder -p 6600 > osc_processor
 $ oscrecorder -p 6600 --forward
 ```
 
-### PLAYING BACK MESSAGES
+## PLAYING BACK MESSAGES
 Playing back OSC messages with *oscplayer* requires specifying the address (--address, -a) and port (--port, -p) to send OSC messages to and optionally:
 * A flag (--wait, -w) to specify whether the padding for the initial message - the time from when recording began to when the first message was received - should be respected. If the flag is not passed, the initial time padding is ignored and the first message is sent immediately.
 * A string specifying a filename (--filename, -f) to read data from. If no filename is specified, oscrecorder will attempt to load data from stdin.
