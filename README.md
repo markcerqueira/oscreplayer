@@ -1,8 +1,8 @@
-== oscreplayer - <em>utility to replay OSC messages</em>
+# oscreplayer - <em>utility to replay OSC messages</em>
 originally by {Tom Lieber}[https://github.com/alltom] with modifications by {Mark Cerqueira}[https://github.com/markcerqueira], {Spencer Salazar}[https://github.com/spencersalazar]
 
-===HOW TO
-====SETUP
+## HOW TO
+### SETUP
 Run *bundle* *install* to get the required gems. We developed this on Ruby version 1.9.3 so you should use at least that. Run <b>ruby --version</b> to check your version of ruby. 
 
 ====RECORDING MESSAGES
